@@ -1,26 +1,28 @@
 [Unit]
-Description=Minecraft Server
+Description=Minecraft Server - Create Chronicles Bosses and Beyond
+After=network.target network-online.target
 Wants=network-online.target
-After=network-online.target
 
 [Service]
-# Ensure to set the correct user and working directory (installation directory of your server) here
+Type=simple
 User=minecraft
-WorkingDirectory=/opt/minecraft
+Group=minecraft
+WorkingDirectory=/srv/minecraft
 
-# You can customize the maximum amount of memory as well as the JVM flags here
-ExecStart=/usr/bin/java -Xmx4G -Xms4G -jar server.jar nogui
+ExecStart=/usr/bin/java @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-47.2.20/unix_args.txt nogui
 
-# Restart the server when it is stopped or crashed after 30 seconds
-# Comment out RestartSec if you want to restart immediately
-Restart=always
+# Graceful shutdown with SIGTERM (Forge catches SIGTERM to save worlds)
+KillSignal=SIGTERM
+TimeoutStopSec=90
+TimeoutStartSec=300
+
+Restart=on-failure
 RestartSec=30
 
-# Alternative: Restart the server only when it stops regularly
-# Restart=on-success
-
-# Do not remove this!
+LimitNOFILE=65536
 StandardInput=null
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+# =============================================================================
+#  cloudflare-sync.conf.example
+#  Configuration template for playit-sync-cloudflare.sh
+# =============================================================================
+
+# Cloudflare API Token with permissions: Zone > DNS > Edit (scoped to your zone)
+CF_API_TOKEN="YOUR_CLOUDFLARE_API_TOKEN"
+
+# Cloudflare Zone ID (from your domain Overview page in Cloudflare Dashboard)
+CF_ZONE_ID="YOUR_CLOUDFLARE_ZONE_ID"
+
+# Minecraft hostname players use to connect
+CF_DOMAIN="mc.example.com"
+
+# Optional: Override playit host and port (otherwise auto-discovered from playit.log and DNS)
+# PLAYIT_HOST="fried-mg.tun.ply.gg"
+# PLAYIT_PORT="11769"

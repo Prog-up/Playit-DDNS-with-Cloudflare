@@ -1,0 +1,13 @@
+[Unit]
+Description=Synchronize Cloudflare DNS for playit.gg Minecraft Tunnel
+After=network-online.target playit.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=-/etc/playit/cloudflare-sync.conf
+ExecStart=/usr/local/bin/playit-sync-cloudflare.sh
+
+[Install]
+WantedBy=multi-user.target
