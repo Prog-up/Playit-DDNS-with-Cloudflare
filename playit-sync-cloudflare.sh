@@ -201,16 +201,19 @@ sync_srv() {
     existing_port=$(echo "$record" | jq -r '.data.port // empty')
     existing_target=$(echo "$record" | jq -r '.data.target // empty')
 
+    # Minecraft client uses the SRV target as the server hostname during protocol handshake.
+    # Playit.gg anycast proxy rejects connections if the handshake hostname is not the claimed playit domain.
+    # Therefore, the SRV target must point directly to PLAYIT_HOST (e.g. fried-mg.tun.ply.gg).
     if [[ -n "$existing_id" ]]; then
-        if [[ "$existing_port" == "$PLAYIT_PORT" && "$existing_target" == "$CF_DOMAIN" ]]; then
-            echo "[=] SRV record for ${srv_name} already points to ${CF_DOMAIN}:${PLAYIT_PORT}. No update needed."
+        if [[ "$existing_port" == "$PLAYIT_PORT" && "$existing_target" == "$PLAYIT_HOST" ]]; then
+            echo "[=] SRV record for ${srv_name} already points to ${PLAYIT_HOST}:${PLAYIT_PORT}. No update needed."
             return 0
         fi
-        echo "[*] Updating SRV record for ${srv_name} -> target: ${CF_DOMAIN}, port: ${PLAYIT_PORT}..."
+        echo "[*] Updating SRV record for ${srv_name} -> target: ${PLAYIT_HOST}, port: ${PLAYIT_PORT}..."
         local payload
         payload=$(jq -n \
             --arg name "$srv_name" \
-            --arg target "$CF_DOMAIN" \
+            --arg target "$PLAYIT_HOST" \
             --argjson port "$PLAYIT_PORT" \
             '{
                 type: "SRV",
@@ -229,11 +232,11 @@ sync_srv() {
         cf_api PUT "/zones/${CF_ZONE_ID}/dns_records/${existing_id}" --data "$payload" > /dev/null
         echo "[+] SRV record updated successfully."
     else
-        echo "[*] Creating new SRV record for ${srv_name} -> target: ${CF_DOMAIN}, port: ${PLAYIT_PORT}..."
+        echo "[*] Creating new SRV record for ${srv_name} -> target: ${PLAYIT_HOST}, port: ${PLAYIT_PORT}..."
         local payload
         payload=$(jq -n \
             --arg name "$srv_name" \
-            --arg target "$CF_DOMAIN" \
+            --arg target "$PLAYIT_HOST" \
             --argjson port "$PLAYIT_PORT" \
             '{
                 type: "SRV",
